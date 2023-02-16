@@ -8,6 +8,7 @@
 #include "logging.cpp"
 #include <GLFW/glfw3.h>
 #include <limits.h>
+#include "shader.cpp"
 #include <fstream>
 #include <GLM/vec3.hpp>
 #include <GLM/vec4.hpp>
@@ -130,39 +131,13 @@ int main(void)
     // glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,3*sizeof(float),(void*)0);
     // glEnableVertexAttribArray(0);
 
+    //Create shader class
+
     //EBO can be used to not overuse the same vertexes for the same objects
     unsigned int EBO;
     glGenBuffers(1, &EBO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-    //Create the Vertex Shader (source will be in file or for now, at the top of the file)
-    unsigned int vertexShader;
-    vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
-    glCompileShader(vertexShader); //Create a shader, with the type being vertex, setting the source to top of file, then compiling it
-
-    int success;
-    char infoLog[512];
-    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-    if (!success)
-    {
-        glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
-    }
-
-
-    unsigned int fragmentShader;
-    fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-    glCompileShader(fragmentShader); //Same process as last time, but instead using fragment shader, last step of process
-
-    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
-    if (!success)
-    {
-        glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
-    }
 
 
     unsigned int texture;
@@ -182,16 +157,7 @@ int main(void)
     }
     stbi_image_free(data);
 
-    unsigned int shaderProgram;
-    shaderProgram = glCreateProgram();
-    glAttachShader(shaderProgram, vertexShader);
-    glAttachShader(shaderProgram, fragmentShader);
-    glLinkProgram(shaderProgram);
-    // glUseProgram(shaderProgram);
-
-    //Don't need the shaders (since they are linked and in use)
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
+    Shader engineShader("./data/shader/vertex.glsl", "./data/shader/fragment.glsl");
 
     //Since openGL doesnt know how to interpret the vertices, we have to tell it how to, 
     //Each vertex is made up of 3 position values, XYZ, with each being 4 bytes.
@@ -211,8 +177,9 @@ int main(void)
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT);
 
+        engineShader.use();
+
         double time = glfwGetTime();
-        glUseProgram(shaderProgram);
         if (lineMode) {
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         }
