@@ -24,10 +24,6 @@ Logging myLogger;
 
 const char *shaderLocation = "./data/shader/vertex.glsl";
 const char *fragLocation = "./data/shader/fragment.glsl";
-//string shaderString = readFileAsString(shaderLocation);
-//string fragString = readFileAsString(fragLocation);
-//const char *vertexShaderSource = shaderString.c_str();
-//const char *fragmentShaderSource = fragString.c_str();
 
 
 bool lineMode = false;
@@ -68,25 +64,28 @@ int main(void)
     bool hasDoneBefore = false;
 
     float vertices[] = {
+        //1st 
         // positions          // colors           // texture coords
-         0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f, // top right
-         0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f, // bottom right
-        -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f, // bottom left
-        -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f  // top left 
+         0.0f,  0.0f, 0.0f,   1.0f, 0.0f, 0.0f,   0.0f, 0.0f, // top right
+         0.0f, -1.0f, 0.0f,   0.0f, 1.0f, 0.0f,   0.0f, -1.0f, // bottom right
+        -1.0f, 0.0f, 0.0f,   0.0f, 0.0f, 1.0f,   -1.0f, 0.0f, // bottom left
+        -1.0f,  -1.0f, 0.0f,   1.0f, 1.0f, 0.0f,   -1.0f, -1.0f,  // bottom left
+
+
+        //2nd
+        // positions          // colors           // texture coords
+         1.0f,  1.0f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f, // top right
+         1.0f, 0.0f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f, // bottom right
+        0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f, // bottom left
+        0.0f,  1.0f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f  // top left 
     };
 
-    //Image stuff testing
-
-
-    // float triangleTwo[] = {
-    //     0.0f, 1.0f, 0.0f,
-    //     0.25f, 0.0f, 0.0f,
-    //     1.0f, 0.5f, 0.0f
-    // };
-
     unsigned int indices[] = {
-        0,1,3,
-        1,2,3
+        //4 triangles
+        0,1,2, //1st
+        2,3,1, //2nd
+        4,5,6, //3rd
+        6,7,4 //4th
     };
 
     unsigned int VBO; //Vertex Buffer Object 
@@ -107,6 +106,7 @@ int main(void)
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
     // position attribute
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
@@ -116,22 +116,6 @@ int main(void)
     // texture coord attribute
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
     glEnableVertexAttribArray(2);
-
-    //Color attribute
-    /*glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-    glEnableVertexAttribArray(2);*/
-
-    // unsigned int VBOTWO;
-    // glGenBuffers(1, &VBOTWO);
-    // unsigned int VAOTWO;
-    // glGenVertexArrays(1, &VAOTWO);
-    // glBindVertexArray(VAOTWO);
-    // glBindBuffer(GL_ARRAY_BUFFER, VBOTWO);
-    // glBufferData(GL_ARRAY_BUFFER, sizeof(triangleTwo), triangleTwo, GL_STATIC_DRAW);
-    // glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,3*sizeof(float),(void*)0);
-    // glEnableVertexAttribArray(0);
-
-    //Create shader class
 
     //EBO can be used to not overuse the same vertexes for the same objects
     unsigned int EBO;
@@ -159,10 +143,6 @@ int main(void)
 
     Shader engineShader("./data/shader/vertex.glsl", "./data/shader/fragment.glsl");
 
-    //Since openGL doesnt know how to interpret the vertices, we have to tell it how to, 
-    //Each vertex is made up of 3 position values, XYZ, with each being 4 bytes.
-    // glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    // glEnableVertexAttribArray(0);
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
@@ -189,16 +169,9 @@ int main(void)
 
         glBindTexture(GL_TEXTURE_2D, texture);
         glBindVertexArray(VAO);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-        // glBindVertexArray(VAOTWO);
-        // glDrawArrays(GL_TRIANGLES, 0,3);
-        // glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLES, sizeof(indices), GL_UNSIGNED_INT, 0);
+        
         glBindVertexArray(0);
-
-        // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-        // glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-        //glBindVertexArray(VAO);
-        //glDrawArrays(GL_TRIANGLES, 0, 3);
 
         /* Swap front and back buffers */
         glfwSwapBuffers(window);
